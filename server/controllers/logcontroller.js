@@ -1,9 +1,9 @@
 let express = require("express");
 let router = express.Router();
 let validateSession = require("../middleware/validate-session");
-const Journal = require("../db").import("../models/journal");
+const Log = require("../db").import("../models/log");
 
-router.post("/log", validateSession, (req, res) => {
+router.post("/", validateSession, (req, res) => {
   const logEntry = {
     description: req.body.description,
     definition: req.body.definition,
@@ -15,6 +15,42 @@ router.post("/log", validateSession, (req, res) => {
     .then((log) => res.status(200).json(log))
     .catch((err) =>
       res.status(500).json({ error: err, message: "Log not created" })
+    );
+});
+
+router.get("/", validateSession, (req, res) => {
+  Log.findAll()
+    .then((log) => res.status(200).json(log))
+    .catch((err) =>
+      res.status(500).json({ error: err, message: "There was a problem" })
+    );
+});
+
+router.get("/:id", validateSession, (req, res) => {
+  let id = req.params.id;
+
+  Log.findAll({
+    where: { id: id },
+  })
+    .then((logs) => res.status(200).json(logs))
+    .catch((err) =>
+      res.status(500).json({ error: err, message: "Couldn't find record" })
+    );
+});
+
+router.put("/:id", validateSession, (req, res) => {
+  const updateLogEntry = {
+    description: req.body.description,
+    definition: req.body.definition,
+    result: req.body.result,
+  };
+
+  const query = { where: { id: req.params.id, owner: req.user.id } };
+
+  Log.update(updateLogEntry, query)
+    .then((logs) => res.status(200).json(logs))
+    .catch((err) =>
+      res.status(500).json({ error: err, message: "Couldn't update record" })
     );
 });
 
