@@ -45,10 +45,12 @@ router.put("/:id", validateSession, (req, res) => {
     result: req.body.result,
   };
 
-  const query = { where: { id: req.params.id, owner: req.user.id } };
+  const query = { where: { id: req.params.id } };
 
   Log.update(updateLogEntry, query)
-    .then((logs) => res.status(200).json(logs))
+    .then((logs) =>
+      res.status(200).json({ message: "Your log has been updated", logs })
+    )
     .catch((err) =>
       res.status(500).json({ error: err, message: "Couldn't update record" })
     );
